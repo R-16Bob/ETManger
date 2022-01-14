@@ -1,0 +1,86 @@
+ create database ETManger;
+
+#客户表
+DROP TABLE IF EXISTS `customer`;
+CREATE TABLE `customer`  (
+  `cid` int(11) NOT NULL AUTO_INCREMENT,
+  `cname` varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `phone` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `email` varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  PRIMARY KEY (`cid`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Compact;
+
+insert into customer(cname,phone,email) values('ET电力工程公司','18688624567','ETCompy@163.com');
+
+#项目表
+DROP TABLE IF EXISTS `project`;
+CREATE TABLE `project`  (
+  `pid` int(11) NOT NULL AUTO_INCREMENT,
+  `cid` int(11) NOT NULL ,
+  `pname` varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `btime` datetime NULL,
+  `etime` datetime NULL,
+ `finish` int(11) NOT NULL DEFAULT '0' ,
+ `profit` float(11) NOT NULL DEFAULT '0',
+ `prate` float(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`pid`) USING BTREE,
+  INDEX `uid`(`cid`) USING BTREE,
+  CONSTRAINT `project_fk_1` FOREIGN KEY (`cid`) REFERENCES `customer` (`cid`) on delete cascade
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Compact;
+
+insert into project(cid,pname,btime) values('1','默认项目','2022-1-2');
+
+# 员工表
+DROP TABLE IF EXISTS `employee`;
+CREATE TABLE `employee`  (
+  `eid` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `phone` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `email` varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `type` int(11) NOT NULL DEFAULT '1' ,
+  `pid` int(11) NOT NULL ,
+  `bonus` float(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`eid`) USING BTREE,
+  INDEX `uid`(`pid`) USING BTREE,
+  CONSTRAINT `employee_fk_1` FOREIGN KEY (`pid`) REFERENCES `project` (`pid`) on delete cascade
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Compact;
+
+insert into employee(eid,name,phone,email,type,pid) values('1000','张三','13835425006','zhangsan@163.com','0','2');
+insert into employee(name,phone,email,pid) values('李四','16865875331','lisi@163.com','2');
+##事件
+DROP TABLE IF EXISTS `event`;
+CREATE TABLE `event`  (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `pid` int(11) NOT NULL ,
+  `item` varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `amount` float(11) NOT NULL DEFAULT '0',
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `uid`(`pid`) USING BTREE,
+  CONSTRAINT `event_fk_1` FOREIGN KEY (`pid`) REFERENCES `project` (`pid`) on delete cascade
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Compact;
+
+insert into event(pid,item,amount,time) values('2','采购施工设备','-25000','2021-12-25');
+insert into event(pid,item,amount) values('2','预付工程款','50000');
+delete from event where id=1;
+select sum(amount) from event;
+
+# 系统用户
+DROP TABLE IF EXISTS `user`;
+CREATE TABLE `user`  (
+  `uid` int(11) NOT NULL AUTO_INCREMENT,
+  `uname` varchar(10) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `upwd` varchar(8) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '123',
+  `eid` int(11) NOT NULL,
+  PRIMARY KEY (`uid`) USING BTREE,
+  INDEX `uid`(`eid`) USING BTREE,
+  CONSTRAINT `user_fk_1` FOREIGN KEY (`eid`) REFERENCES `employee` (`eid`) on delete cascade
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Compact;
+
+insert into user(uname,upwd,eid) values('zhang3','000',1000);
+
+//视图
+create view projectView as
+select pid,pname,p.cid,cname,finish
+from project p,customer c
+where p.cid=c.cid;
